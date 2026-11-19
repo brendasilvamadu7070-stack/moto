@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moto Racing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game">
+        <h1>🏍️ MOTO RACING</h1>
+
+        <div class="info">
+            <span>Pontos: <b id="score">0</b></span>
+            <span>Velocidade: <b id="speed">1</b></span>
+        </div>
+
+        <div class="road" id="road">
+            <div class="lines"></div>
+
+            <div class="bike" id="bike">🏍️</div>
+
+            <div class="obstacle" id="obstacle">🚧</div>
+
+            <div class="message" id="message">
+                <h2>GAME OVER</h2>
+                <p>Você bateu!</p>
+                <button onclick="restartGame()">Jogar novamente</button>
+            </div>
+        </div>
+
+        <p class="controls">
+            Use ← → ou A e D para movimentar a moto
+        </p>
+    </div>
+
+    <script>
+        const bike = document.getElementById("bike");
+        const obstacle = document.getElementById("obstacle");
+        const road = document.getElementById("road");
+        const scoreText = document.getElementById("score");
+        const speedText = document.getElementById("speed");
+        const message = document.getElementById("message");
+
+        let bikeX = 50;
+        let obstacleY = -100;
+        let score = 0;
+        let speed = 4;
+        let running = true;
+
+        function moveBike(direction) {
+            if (!running) return;
+
+            bikeX += direction * 7;
+            bikeX = Math.max(10, Math.min(90, bikeX));
+
+            bike.style.left = bikeX + "%";
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
+                moveBike(-1);
+            }
+
+            if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
+                moveBike(1);
+            }
+        });
+
+        function gameLoop() {
+            if (!running) return;
+
+            obstacleY += speed;
+
+            if (obstacleY > 550) {
+                obstacleY = -100;
+                obstacle.style.left = (15 + Math.random() * 70) + "%";
+                score += 10;
+                speed = Math.min(10, 4 + score / 150);
+
+                scoreText.textContent = score;
+                speedText.textContent = Math.round(speed);
+            }
+
+            obstacle.style.top = obstacleY + "px";
+
+            const bikeRect = bike.getBoundingClientRect();
+            const obstacleRect = obstacle.getBoundingClientRect();
+
+            if (
+                bikeRect.left < obstacleRect.right - 10 &&
+                bikeRect.right > obstacleRect.left + 10 &&
+                bikeRect.top < obstacleRect.bottom - 10 &&
+                bikeRect.bottom > obstacleRect.top + 10
+            ) {
+                endGame();
+                return;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            running = false;
+            message.style.display = "flex";
+        }
+
+        function restartGame() {
+            bikeX = 50;
+            obstacleY = -100;
+            score = 0;
+            speed = 4;
+            running = true;
+
+            bike.style.left = "50%";
+            obstacle.style.top = "-100px";
+
+            scoreText.textContent = "0";
+            speedText.textContent = "1";
+            message.style.display = "none";
+
+            gameLoop();
+        }
+
+        gameLoop();
+    </script>
+
+</body>
+</html>
